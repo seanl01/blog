@@ -6,51 +6,32 @@ type Metadata = {
   publishedAt: string
   summary: string
   image?: string
+  tags?: string[]
 }
 
-function parseFrontmatter(fileContent: string) {
-  let frontmatterRegex = /---\s*([\s\S]*?)\s*---/
-  let match = frontmatterRegex.exec(fileContent)
-  let frontMatterBlock = match![1]
-  let content = fileContent.replace(frontmatterRegex, '').trim()
-  let frontMatterLines = frontMatterBlock.trim().split('\n')
-  let metadata: Partial<Metadata> = {}
-
-  frontMatterLines.forEach((line) => {
-    let [key, ...valueArr] = line.split(': ')
-    let value = valueArr.join(': ').trim()
-    value = value.replace(/^['"](.*)['"]$/, '$1') // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value
-  })
-
-  return { metadata: metadata as Metadata, content }
+type Post = {
+  default: React.ComponentType<any>
+  slug: string
+  metadata: Metadata
 }
 
-function getMDXFiles(dir) {
+function getMDXFiles(dir: string) {
   return fs.readdirSync(dir).filter((file) => path.extname(file) === '.mdx')
 }
 
-function readMDXFile(filePath) {
-  let rawContent = fs.readFileSync(filePath, 'utf-8')
-  return parseFrontmatter(rawContent)
-}
-
-function getMDXData(dir) {
-  let mdxFiles = getMDXFiles(dir)
-  return mdxFiles.map((file) => {
-    let { metadata, content } = readMDXFile(path.join(dir, file))
+export async function getBlogPosts(): Promise<Post[]> {
+  let mdxFiles = getMDXFiles("app/blog/posts")
+  console.log("mdxFiles", mdxFiles)
+  return Promise.all(mdxFiles.map(async (file) => {
+    let { default: Blog, metadata } = await import(`app/blog/posts/${file}`)
     let slug = path.basename(file, path.extname(file))
 
     return {
-      metadata,
+      default: Blog,
       slug,
-      content,
+      metadata,
     }
-  })
-}
-
-export function getBlogPosts() {
-  return getMDXData(path.join(process.cwd(), 'app', 'blog', 'posts'))
+  }))
 }
 
 export function formatDate(date: string, includeRelative = false) {

@@ -1,8 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 ::selection {
   background-color: #47a3f3;
   color: #fefefe;
+}
+
+@theme {
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 :root {
@@ -115,10 +121,14 @@ html {
   @apply list-decimal pl-6;
 }
 
+.katex-html {
+  @apply hidden;
+}
+
 .prose > :first-child {
   /* Override removing top margin, causing layout shift */
-  margin-top: 1.25em !important;
-  margin-bottom: 1.25em !important;
+  /*margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;*/
 }
 
 pre::-webkit-scrollbar {
