@@ -104,10 +104,6 @@ function createHeading(level: number) {
   return Heading
 }
 
-// function makeHeading(level: number): React.FC<{ children: React.ReactNode }> {
-//   return ({ children }) => <h4 className="prose prose-gray dark:prose-invert prose-xl font-bold">{children}</h4>
-// }
-
 const components = {
   h1: createHeading(1),
   h2: createHeading(2),

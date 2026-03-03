@@ -105,7 +105,7 @@ export default async function Blog({ params }) {
   const { slug } = await params
   const { default: Post, metadata } = await import(`app/blog/posts/${slug}.mdx`)
   return <>
-    <article className="prose prose-gray dark:prose-invert">
+    <article className="prose prose-neutral dark:prose-invert">
       <Frontmatter metadata={metadata} />
       <Post />
     </article>

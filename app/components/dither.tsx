@@ -22,21 +22,23 @@ export default function SettableDither() {
   const [ditherConfig, setDitherConfig] = useState(defaultConfig);
 
   return (
-    <Dithering
-      onMouseEnter={() =>
-        {
-          setDitherConfig((config) => ({ ...config, speed: 1.8 }));
+    <div className="max-h-[40vh] sm:max-h-none overflow-clip w-full my-8">
+      <Dithering
+        className=""
+        onMouseEnter={() =>
+          {
+            setDitherConfig((config) => ({ ...config, speed: 2.2 }));
+          }
         }
-      }
-      onMouseLeave={() =>
-        {
-          setDitherConfig((config) => ({ ...config, speed: 0.8 }));
+        onMouseLeave={() =>
+          {
+            setDitherConfig((config) => ({ ...config, speed: 0.8 }));
+          }
         }
-      }
-      className="w-100vw my-8"
-      // width={1280}
-      height={420}
-      {...ditherConfig}
-    />
+        // width={1280}
+        height={420}
+        {...ditherConfig}
+      />
+    </div>
   );
 }
