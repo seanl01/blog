@@ -7,9 +7,9 @@
 
 // module.exports = nextConfig
 import createMDX from '@next/mdx'
+import { NextConfig } from 'next'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   output: 'export',
   basePath: process.env.PAGES_BASE_PATH,
