@@ -11,7 +11,12 @@ export async function BlogPosts() {
     return 1
   })
 
-  let groupedBlogs = Object.groupBy(allBlogs, (post) => post.metadata.publishedAt.slice(0, 4))
+  let groupedBlogs = allBlogs.reduce((acc, post) => {
+    const year = post.metadata.publishedAt.slice(0, 4)
+    acc[year] = acc[year] ?? []
+    acc[year].push(post)
+    return acc
+  }, {} as Record<string, typeof allBlogs>)
 
   return (
     <div>
