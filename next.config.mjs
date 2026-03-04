@@ -11,6 +11,9 @@ import createMDX from '@next/mdx'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  output: 'export',
+  basePath: process.env.PAGES_BASE_PATH,
+  images: { unoptimized: true },
 }
 
 const withMDX = createMDX({

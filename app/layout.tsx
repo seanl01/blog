@@ -8,6 +8,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import Footer from './components/footer'
 import { baseUrl } from './sitemap'
 import Head from 'next/head'
+import { ThemeProvider } from './components/theme-provider';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -15,12 +16,12 @@ export const metadata: Metadata = {
     default: 'Sean Lim',
     template: '%s | Sean Lim',
   },
-  description: 'This is my portfolio.',
+  description: 'Sean Lim Portfolio',
   openGraph: {
-    title: 'My Portfolio',
-    description: 'This is my portfolio.',
+    title: 'Sean Lim',
+    description: 'Sean Lim Portfolio',
     url: baseUrl,
-    siteName: 'My Portfolio',
+    siteName: 'Sean Lim',
     locale: 'en_US',
     type: 'website',
   },
@@ -47,21 +48,29 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cx(
-        'text-black bg-white dark:text-white dark:bg-black',
+        // 'text-black bg-white dark:text-white dark:bg-black',
         'overflow-y-scroll',
         GeistSans.variable,
         // GeistMono.variable
       )}
     >
-      <body className="antialiased max-w-2xl mx-4 mt-8 lg:mx-auto">
-        <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0 ">
-          <Navbar />
-          {children}
-          <Footer />
-          <Analytics />
-          <SpeedInsights />
-        </main>
+      <body className="antialiased max-w-2xl mx-4 mt-8 sm:mx-1 md:mx-auto">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0 ">
+            <Navbar />
+            {children}
+            <Footer />
+            <Analytics />
+            <SpeedInsights />
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   )

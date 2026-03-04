@@ -23,7 +23,7 @@ export default function Socials() {
           href={social.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative text-neutral-800 opacity-35 dark:opacity-50 hover:opacity-80 dark:text-neutral-100 hover:-translate-y-0.5 transition-all"
+          className="group relative text-neutral-800 opacity-35 hover:opacity-90 dark:text-foreground hover:-translate-y-0.5 transition-all"
           aria-label={social.label}
         >
           {/* Gradient blur shadow - appears on hover */}
