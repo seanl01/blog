@@ -31,10 +31,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Detect package manager
         id: detect-package-manager
         run: |
-          if [ -f "${{ github.workspace }}/bun.lockb" ]; then
+          # Detect bun (support both bun.lock and bun.lockb), yarn, or npm
+          if [ -f "${{ github.workspace }}/bun.lock" ] || [ -f "${{ github.workspace }}/bun.lockb" ]; then
             echo "manager=bun" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=bun" >> $GITHUB_OUTPUT
@@ -53,10 +55,14 @@ jobs:
             echo "Unable to determine package manager"
             exit 1
           fi
+
+      # Only setup Bun when a bun lockfile was detected
       - name: Setup Bun
+        if: steps.detect-package-manager.outputs.manager == 'bun'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
@@ -65,20 +71,24 @@ jobs:
           #
           # You may remove this line if you want to manage the configuration yourself.
           static_site_generator: next
+
       - name: Restore cache
         uses: actions/cache@v4
         with:
           path: |
             .next/cache
           # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/bun.lockb') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/bun.lockb', '**/bun.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/bun.lockb') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/bun.lockb', '**/bun.lock') }}-
+
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
