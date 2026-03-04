@@ -50,17 +50,48 @@ function CustomLink(props: any) {
 }
 
 function RoundedImage(props: any) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
-  const src = props.src.startsWith('/') ? `${basePath}${props.src}` : props.src
+  let { src, alt, ...rest } = props
+  let customWidth: string | null = null
 
+  // Parse Obsidian-style width: ![Alt Text|300](/path/to/image.png)
+  if (typeof alt === 'string' && alt.includes('|')) {
+    const parts = alt.split('|')
+    alt = parts[0].trim()
+    const potentialWidth = parts[1].trim()
+    if (!isNaN(Number(potentialWidth))) {
+      customWidth = potentialWidth
+    }
+  }
+
+  // Prepend the base path for GitHub Pages compatibility
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || process.env.PAGES_BASE_PATH || ''
+  const finalSrc = src?.startsWith('/') ? `${basePath}${src}` : src
+
+  // If a custom width is provided, use a standard img to allow natural height: auto
+  if (customWidth) {
+    return (
+      <div style={{ width: `${customWidth}px`, maxWidth: '100%', margin: '2rem auto' }}>
+        <img
+          src={finalSrc}
+          alt={alt || ''}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          className="rounded-lg"
+          {...rest}
+        />
+      </div>
+    )
+  }
+
+  // Fallback to original full-width behavior for standard images
   return (
-    <section className='w-full min-h-[40vh] relative'>
+    <section className='w-full min-h-[40vh] relative my-8'>
       <Image
-        alt={props.alt}
+        alt={alt || ''}
         fill
         style={{ objectFit: "contain" }}
-        {...props}
-        src={src} // Apply the prefixed source
+        className="rounded-lg"
+        {...rest}
+        src={finalSrc}
       />
     </section>
   )
