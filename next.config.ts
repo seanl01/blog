@@ -12,8 +12,8 @@ import { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   output: 'export',
-  basePath: process.env.PAGES_BASE_PATH,
-  assetPrefix: process.env.PAGES_BASE_PATH,
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH,
   images: { unoptimized: true },
 }
 

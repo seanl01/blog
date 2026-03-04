@@ -50,15 +50,20 @@ function CustomLink(props: any) {
 }
 
 function RoundedImage(props: any) {
-  // pass through props to next/image and add some default styles
-  return <section className='w-full min-h-[40vh] relative'>
-            <Image
-              alt={props.alt}
-              // className="rounded-lg"
-              fill
-              style={{ objectFit: "contain" }}
-              {...(props as Omit<ImageProps, "alt"> | ImageProps)} />
-        </section>
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+  const src = props.src.startsWith('/') ? `${basePath}${props.src}` : props.src
+
+  return (
+    <section className='w-full min-h-[40vh] relative'>
+      <Image
+        alt={props.alt}
+        fill
+        style={{ objectFit: "contain" }}
+        {...props}
+        src={src} // Apply the prefixed source
+      />
+    </section>
+  )
 }
 
 function Code({ children, ...props }: any) {
