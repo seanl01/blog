@@ -2,6 +2,8 @@ import { BlogPosts } from 'app/components/posts'
 import SettableDither from './components/dither'
 import Socials from './components/socials'
 import Image from 'next/image'
+import source from "../public/medium.jpeg"
+
 export default function Page() {
   return (
     <section>
@@ -16,7 +18,7 @@ export default function Page() {
               }}
               aria-hidden="true"
             />
-            <Image className='relative z-30 rounded-xl' src="/medium.jpeg" alt="Profile Picture" width={40} height={40} priority />
+            <Image className='relative z-30 rounded-xl' src={source} alt="Profile Picture" width={40} height={40} priority />
           </div>
           <h1 className="text-4xl font-semibold tracking-tighter font-mono leading-none">
             Sean Lim
