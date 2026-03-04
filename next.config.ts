@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   output: 'export',
   basePath: process.env.PAGES_BASE_PATH,
-  assetPrefix: process.env.PAGES_BASE_PATH,
+  assetPrefix: process.env.PAGES_BASE_PATH + "/blog",
   images: { unoptimized: true },
 }
 
