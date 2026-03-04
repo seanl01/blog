@@ -40,7 +40,7 @@
     "sugar-high": "^0.6.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.17",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.0-dev.20260304"
   },
   "devDependencies": {
     "shadcn": "^3.8.5",
