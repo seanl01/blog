@@ -2,7 +2,7 @@ import { getBlogPosts } from 'app/blog/utils'
 
 export const dynamic = 'force-static'
 
-export const baseUrl = 'https://portfolio-blog-starter.vercel.app'
+export const baseUrl = 'https://seanl01.github.io/blog'
 
 export default async function sitemap() {
   let blogs = (await getBlogPosts()).map((post) => ({
