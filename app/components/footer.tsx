@@ -54,7 +54,7 @@ export default function Footer() {
         </li>*/}
       </ul>
       <p className="mt-8 text-neutral-600 dark:text-neutral-300">
-        © {new Date().getFullYear()} Sean Lim. Built upon on Next.js Portfolio Starter.
+        © {new Date().getFullYear()} Sean Lim. Built on Next.js Portfolio Starter.
       </p>
     </footer>
   )

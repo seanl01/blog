@@ -2,7 +2,6 @@ import type { MDXComponents } from 'mdx/types'
 import Image, { ImageProps } from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { highlight } from 'sugar-high'
 
 /**
  * Global MDX components used for all MDX files in the app.
@@ -97,11 +96,11 @@ function RoundedImage(props: any) {
   )
 }
 
-function Code({ children, ...props }: any) {
-  // sugar-high highlight returns HTML; we render with dangerouslySetInnerHTML
-  const codeHTML = highlight(children)
-  return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
-}
+// function Code({ children, ...props }: any) {
+//   // sugar-high highlight returns HTML; we render with dangerouslySetInnerHTML
+//   const codeHTML = highlight(children)
+//   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} style={{ whiteSpace: 'pre-wrap' }} {...props} />
+// }
 
 function slugify(str: any) {
   return str
@@ -150,7 +149,7 @@ const components = {
   // p: (props: any) => <p className="prose prose-gray dark:prose-invert" {...props} />,
   img: RoundedImage, // map markdown `![]()` to next/image
   a: CustomLink,
-  code: Code,
+  // code: CodeBlock,
   Table,
 } satisfies MDXComponents
 

@@ -21,7 +21,7 @@ export default function SettableDither() {
       setDitherConfig((prev) => ({
         ...prev,
         colorFront: "#7d7d7d",
-        colorBack: "#000000",
+        colorBack: "#0a0a0a",
       }));
     } else {
       setDitherConfig((prev) => ({

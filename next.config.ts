@@ -25,6 +25,7 @@ const withMDX = createMDX({
       'remark-math',
       // With options
       ['remark-toc', { heading: 'Contents' }],
+      'remark-sugar-high'
     ],
     rehypePlugins: [
       // Without options
