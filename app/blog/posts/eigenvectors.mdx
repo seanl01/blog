@@ -1,0 +1,334 @@
+export const metadata = {
+  title: 'Understanding eigenvectors: visualization and application',
+  publishedAt: '2026-03-03',
+  summary: 'Eigenvectors capture characteristic information about a matrix. As such, their applications are wide ranging, from dimensionality reduction to understanding the dynamics of systems. In this post, we attempt to understand eigenvectors through visualizations, code, and their application in the famous PageRank algorithm.',
+  tags: ['Machine Learning', 'Deep Learning', 'Linear Algebra']
+};
+
+## Contents
+
+## Introduction This post will not attempt to explain eigenvectors in great
+detail. [3Blue1Brown's
+introduction](https://www.youtube.com/watch?v=PFDu9oVAE-g) does a fantastic job
+explaining them intuitively. We will, however, attempt to help us understand how
+eigenvectors work through a few visualizations in Python that you can take and
+adapt for yourself. We also review finding eigenvectors by hand, capping
+off with a toy implementation of Google's famous PageRank algorithm which uses
+eigenvectors in an ingenious way.
+
+### What are eigenvectors?
+
+Eigenvectors come from the German word *eigen* which means "characteristic" or "of self". The eigenvectors of a matrix are special vectors that respond to the linear transformation represented by the matrix in a unique way. Specifically, they do not just get thrown anywere and everywhere in the vector space when the transformation is applied: rather, they only get scaled by a certain factor (called the eigenvalue). Let's see how we formally define a single eigenvector. For a matrix $A$, scalar $\lambda$, and non-zero vector $v$, we say that $v$ is an eigenvector of $A$ with corresponding eigenvalue $\lambda$ if the following is satisfied:
+
+$$
+A\bold{v} = \lambda \bold{v}
+$$
+
+The best way to understand how an eigenvector responds to linear transformations is to visualize it.
+
+## A. Visualizing eigenvectors
+Here we start off with a 2x2 transformation matrix $A$. We observe how this linear transformation affects the unit vectors in order to understand what it does. The unit vectors are $u_1 = [1, 0]$ and $u_2 = [0, 1]$.
+We can visualize the transformation of these unit vectors. We also plot a single eigenvector of $A$ to see how it responds to the transformation.
+
+![unit|400](/posts/eigenvectors/after_applying_A_once.png)
+
+Based on the graph, we can see that the linear transformation represented by $A$ stretches and rotates the unit vectors $u_1$ (red) and
+$u_2$ (blue). Yet the eigenvector (green) appears relatively unchanged: it only scales forwards and backwards within the same line.
+
+**Python Code:**
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_vector(x, color='red', alpha=1.0, **kwargs):
+    plt.quiver([0], [0], [x[0]], [x[1]], angles='xy', scale_units='xy', scale=1, color=color, alpha=alpha, **kwargs)
+
+# A represents linear transformation that stretches and rotates vectors in 2D space
+A = np.array([[0.5, 2], [1, 1.5]])
+
+u1 = np.array([1, 0]) # standard basis vector
+u2 = np.array([0, 1]) # standard basis vector
+
+eigenvalues, eigenvectors = np.linalg.eig(A)
+
+# Initial vectors
+def setup(u1, u2, eig, alpha):
+  plot_vector(u1, "r", alpha=alpha)
+  plot_vector(u2, "b", alpha=alpha)
+  plot_vector(eig, "g", alpha=alpha)
+  plt.legend(["u1", "u2", "eigenvector"])
+
+```
+
+
+![unit|400](/posts/eigenvectors/after_applying_A_multiple_times.png)
+
+As you apply the linear map $A$ multiple times, we see that red and blue vectors swing in different directions while the green eigenvector grows only along the same line. While eigenvectors may change sign, they still only scale along the span of a single line.
+
+**Python Code:**
+
+```python
+# Apply map 10 times, reducing alpha each time, compare how unit vectors are transformed by A, A^2, A^3, ..., A^10 with the eigenvector
+K = 10
+alpha = 1.0
+curr_x = u1
+curr_y = u2
+curr_eig = eigenvectors[:, 1]
+
+plt.figure(figsize=(6, 6))
+
+for i in range(K):
+    setup(curr_x, curr_y, curr_eig, alpha)
+
+    # Transform vectors by A each iteration to get A, A^2, A^3...
+    curr_x = A @ curr_x
+    curr_y = A @ curr_y
+    curr_eig = A @ curr_eig
+
+    alpha *= 0.7  # Reduce alpha more gradually to see the overlay
+
+    # x-lim and y-lim
+    plt.gca().set_aspect("equal") # get current axes and set aspect
+    plt.xlim(-4, 4)
+    plt.ylim(-4, 4)
+
+    # set ticks to 1
+    plt.xticks(np.arange(-4, 5, 1))
+    plt.yticks(np.arange(-4, 5, 1))
+
+    plt.title("After applying A multiple times")
+    plt.grid()
+
+    # Create first plot with dashed lines for the first iteration
+    if i == 0:
+        # style as dashed line pyplot
+        plot_vector(curr_x, "r", alpha=alpha)
+        plot_vector(curr_y, "b", alpha=alpha)
+        plt.title("After applying A once")
+        # show first plot
+        plt.show()
+
+        plt.figure(figsize=(6, 6))
+        setup(u1, u2, eigenvectors[:, 1], alpha)
+        plot_vector(curr_x, "r", alpha=alpha)
+        plot_vector(curr_y, "b", alpha=alpha)
+
+# show second plot
+plt.show()
+```
+
+
+## B. Finding eigenvectors by hand
+In part A, we cheated a bit by using `numpy`'s built-in eigenvector solver. As an exercise in understanding, let's see
+whether we can find eigenvalues and eigenvectors by hand.
+
+First we take our definition of eigenvectors, then rearrange it to get a homogeneous system of equations (essentially a system of equations where the right hand side is the zero vector).
+
+$$
+\begin{aligned}
+&A \bold{v} = \lambda \bold{v} \\
+&A \bold{v} - \lambda \bold{v} = \bold{0} \\
+\end{aligned}
+$$
+
+We can't directly factor out $v$ because $\lambda$ is a scalar and $A$ is a matrix, so $A-\lambda$ isn't a thing (undefined operation). To get around this, we can introduce the identity matrix $I$ to get the following:
+
+$$
+(A - I \lambda)\bold{v} = \bold{0}
+$$
+
+This results in a matrix consisting of the original matrix with $\lambda$ subtracted from the diagonal elements. We want to exclude trivial solution $v = 0$, as that is plain uninteresting.
+The only way for the homogeneous system to have a non-trivial solution is if the matrix $A - I \lambda$ is *singular*, which means that its [determinant](https://www.youtube.com/watch?v=Ip3X9LOh2dk) must be zero.
+This gives us something known as the *characteristic polynomial* of $A$, which is a polynomial in $\lambda$ that we can solve to find the eigenvalues. The characteristic polynomial is given by:
+
+$$
+\det(A - \lambda I) = 0
+$$
+
+We know that the determinant of a 2x2 matrix $\begin{bmatrix} a & b \\ c & d \end{bmatrix}$ is given by $ad - bc$. Applying this to our matrix $A - \lambda I$ gives us the characteristic polynomial:
+
+$$
+\begin{aligned}
+&\det\left(\begin{bmatrix} 0.5 - \lambda & 2 \\ 1 & 1.5 - \lambda \end{bmatrix}\right) = 0 \\
+&(0.5 - \lambda)(1.5 - \lambda) - 2 = 0 \\
+&\lambda^2 - 2\lambda - 0.25 = 0
+\end{aligned}
+$$
+
+Factoring, we get:
+
+$$
+(\lambda - 2.5)(\lambda + 0.5) = 0
+$$
+
+yielding the eigenvalues $\lambda_1 = 2.5$ and $\lambda_2 = -0.5$. We can then plug these eigenvalues back into the equation $A\bold{v} = \lambda \bold{v}$ to find the corresponding eigenvectors.
+
+For $\lambda_1 = 2.5$:
+
+$$
+\begin{aligned}
+&\begin{bmatrix} 0.5 - 2.5 & 2 \\ 1 & 1.5 - 2.5 \end{bmatrix} \bold{v} = \bold{0} \\
+&\begin{bmatrix} -2 & 2 \\ 1 & -1 \end{bmatrix} \bold{v} = \bold{0}
+\end{aligned}
+$$
+
+If we represent $\bold{v}$ as $\begin{bmatrix} v_1 \\ v_2 \end{bmatrix}$, we can rewrite the above as:
+
+$$
+\begin{aligned}
+&-2v_1 + 2v_2 = 0 \\
+&v_1 - v_2 = 0
+\end{aligned}
+$$
+which gets us $v_1 = v_2$. Thus any vector of the form $\begin{bmatrix} t \\ t \end{bmatrix}$ for $t \neq 0$ is an eigenvector corresponding to $\lambda_1 = 2.5$.
+An example is $\begin{bmatrix} -1 \\ -1 \end{bmatrix}$. This looks a bit like the green eigenvector in our visualizations.
+
+For $\lambda_2 = -0.5$:
+$$
+\begin{aligned}
+&\begin{bmatrix} 0.5 + 0.5 & 2 \\ 1 & 1.5 + 0.5 \end{bmatrix} \bold{v} = \bold{0} \\
+&\begin{bmatrix} 1 & 2 \\ 1 & 2 \end{bmatrix} \bold{v} = \bold{0}
+\end{aligned}
+$$
+
+Rewriting this as:
+$$
+\begin{aligned}
+&v_1 + 2v_2 = 0 \\
+&v_1 + 2v_2 = 0
+\end{aligned}
+$$
+which gets us $v_1 = -2v_2$. Thus any vector of the form $\begin{bmatrix} -2t \\ t \end{bmatrix}$ for $t \neq 0$ is an eigenvector corresponding to $\lambda_2 = -0.5$.
+An example is $\begin{bmatrix} -2 \\ 1 \end{bmatrix}$.
+
+
+## C. Application: PageRank
+Phew, that was quite a lot to take in. To cap off this
+post, let's see how eigenvectors are used in the famous PageRank algorithm,
+which was the original algorithm that Google used to rank web pages in their
+search engine. The primary problem that PageRank tried to solve is how to rank relevance of webpages. The heuristic that Larry Page used was to look at how pages linked to one another in order to determine their relevance.
+
+According to [Google](https://web.archive.org/web/20111104131332/https://www.google.com/competition/howgooglesearchworks.html):
+> PageRank works by counting the number and quality of links to a page to determine a rough estimate of how important the website is. The underlying assumption is that more important websites are likely to receive more links from other websites
+
+Its clever name is a play on the inventor's name, Larry Page, and "web page".
+
+Let's say we have 5 webpages, A, B, C, D, and E. We can represent the linking
+structure of these pages using a matrix $M$, where $M_{ij}$ is 1 if page $j$
+links to page $i$, and 0 otherwise. For example, if page A links to page B and
+page C, but not to pages D and E, then the first column of $M$ would be [0, 1,
+1, 0, 0].
+
+![Adjacency](/posts/eigenvectors/adjacency.png)
+
+PageRank imagines a random surfer who starts on a random webpage and then randomly clicks on links. The PageRank of a page is the probability that the random surfer will be on page $i$ at any given time.
+This can be represented as a vector $r$, where $r_i$ is the PageRank of page $i$.
+
+To think about probabilities, we need to normalize the columns of $M$ so that they sum to 1. Since column $j$ represents the outgoing links from page $j$, we can divide each entry in column $j$ by the total number of outgoing links from page $i$.
+This gives us a new matrix $P$ where $P_{ij}$ is the probability of moving from page $j$ to page $i$. Here, $P$ represents the transition probabilities of the random surfer moving from one page to another.
+
+![Adjacency probability](/posts/eigenvectors/adjacency2.png)
+
+We start off assuming that the surfer has an equal probability of being on any of
+the 5 pages, so $r$ initially looks $r = [0.2, 0.2, 0.2, 0.2, 0.2]$. After one step of the
+random surfer clicking a link, the new probabilities can be calculated as $Pr$.
+After two steps, it would be $P(Pr) = P^2r$, and so on. As we apply this process
+repeatedly, we are essentially applying the transition matrix $P$ multiple times
+to the initial distribution.
+
+Our relevance metric wants to assign importance based on the probabilities of
+being on each page, given the assumption that more links to a page indicate
+higher relevance. Our initial guess is just a uniform distribution and that
+doesn't help us rank the pages. What we want to find is the stable probabilities
+(stationary distribution) of being on each page, which means we want to find a
+vector $r$ such that $Pr = r$. In simple terms, this means we've reached a
+stable enough state where the probabilities of being on each page don't change
+anymore as we apply the transition matrix $P$ repeatedly.
+
+Recalling our eigenvector equation $Av = \lambda v$, we can see that the
+equation $Pr = r$ is essentially saying that $r$ is an eigenvector of $P$
+corresponding to the eigenvalue 1. This gives us the steady-state
+distribution of the random surfer's location.
+
+It turns out that finding, or at least approximating, $r$ just involves applying the transition matrix $P$ repeatedly to an initial guess for $r$.
+This process is known as the **power iteration method**, and it converges to the dominant eigenvector of $P$, which in this case is the PageRank vector.
+
+Enough talking, let's write some code.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+M = np.array([
+  0, 1, 1, 0, 0,
+  1, 0, 0, 1, 0,
+  1, 1, 0, 1, 0,
+  0, 0, 0, 0, 1,
+  0, 0, 0, 0, 0
+]).reshape(5, 5)
+
+# Broadcast along columns
+P = M / M.sum(axis=0)
+r = np.ones(5) * 1 / 5
+
+iters = 10
+
+rs = []
+
+for i in range(iters):
+  r = P @ r
+  rs.append(r)
+  plot_vector(r, "purple", alpha=0.2)
+
+plt.title(f"PageRank Convergence at {iters} iterations")
+plt.gca().set_aspect("equal") # get current axes and set aspect
+plt.xlim(-0.5, 0.5)
+plt.ylim(-0.5, 0.5)
+plt.savefig(f"pagerank_convergence_{iters}.png")
+plt.grid()
+plt.show()
+```
+If we plot the vector at each iteration, we can see that it gradually converges to a single dominant eigenvector, which represents the PageRank of each page.
+Do note that we are only looking at the first two dimensions here, the real vector is 5-dimensional.
+The page with the highest value in the final vector is considered the most relevant according to the PageRank algorithm.
+
+After **10 iterations**:
+![After 10 iterations, pagerank convergence|500](/posts/eigenvectors/pagerank_convergence_10.png)
+
+After **50 iterations**:
+![After 50 iterations, pagerank convergence|500](/posts/eigenvectors/pagerank_convergence_50.png)
+
+If we plot all 5 dimensions as a line plot, we see how each probability stabilizes after a while.
+
+![PageRank convergence line plot|500](/posts/eigenvectors/pagerank_convergence_line_50.png)
+
+Our $r$ after 50 iterations is approximately `[0.44 0.22 0.33 0. 0.]`, implying page A has the highest PageRank, with C coming in second.
+
+**Code for line plot**:
+
+```python
+plt.plot(rs)
+for page_rank in r:
+    # plot last r value
+    plt.text(iters, page_rank, f"{page_rank:.2f}", fontsize=9, ha='right')
+
+# place legend top right
+plt.title(f"PageRank Convergence at {iters} iterations")
+plt.legend(list("ABCDE"), loc="upper left")
+plt.savefig(f"pagerank_convergence_line_{iters}.png")
+plt.show()
+
+print(r)
+```
+The real PageRank includes something called a damping factor, which helps to
+account for disconnected pages (no path of links possible) and the scenario where the random surfer
+"teleports" to an arbitrary page without using an outgoing link - but we have
+excluded it here for simplicity. Read more about it in this great page from [Cornell](https://pi.math.cornell.edu/~mec/Winter2009/RalucaRemus/Lecture3/lecture3.html),
+from which I took inspiration for the discussion above.
+
+## Conclusion
+
+In this post, we aimed to get a better grasp of eigenvectors through
+Python visualizations, a walkthrough by hand, and a practical application in the PageRank algorithm.
+Hopefully you captured some "characteristic information" about them!
